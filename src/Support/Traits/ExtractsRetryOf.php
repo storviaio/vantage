@@ -1,8 +1,8 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Support\Traits;
+namespace Storvia\Vantage\Support\Traits;
 
-use HoudaSlassi\Vantage\Support\VantageLogger;
+use Storvia\Vantage\Support\VantageLogger;
 use Illuminate\Support\Str;
 
 trait ExtractsRetryOf

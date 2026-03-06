@@ -1,11 +1,11 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Http\Controllers;
+namespace Storvia\Vantage\Http\Controllers;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
-use HoudaSlassi\Vantage\Support\QueueDepthChecker;
-use HoudaSlassi\Vantage\Support\TagAggregator;
-use HoudaSlassi\Vantage\Support\VantageLogger;
+use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\QueueDepthChecker;
+use Storvia\Vantage\Support\TagAggregator;
+use Storvia\Vantage\Support\VantageLogger;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Http\Request;
 use Illuminate\Queue\Jobs\Job;

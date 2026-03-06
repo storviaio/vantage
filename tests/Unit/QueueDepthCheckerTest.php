@@ -1,7 +1,7 @@
 <?php
 
-use HoudaSlassi\Vantage\Models\VantageJob;
-use HoudaSlassi\Vantage\Support\QueueDepthChecker;
+use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\QueueDepthChecker;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

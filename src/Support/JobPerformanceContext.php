@@ -1,6 +1,6 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Support;
+namespace Storvia\Vantage\Support;
 
 /**
  * Simple static context to keep per-job runtime baselines in memory

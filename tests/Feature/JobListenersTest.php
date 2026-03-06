@@ -1,9 +1,9 @@
 <?php
 
-use HoudaSlassi\Vantage\Listeners\RecordJobFailure;
-use HoudaSlassi\Vantage\Listeners\RecordJobStart;
-use HoudaSlassi\Vantage\Listeners\RecordJobSuccess;
-use HoudaSlassi\Vantage\Models\VantageJob;
+use Storvia\Vantage\Listeners\RecordJobFailure;
+use Storvia\Vantage\Listeners\RecordJobStart;
+use Storvia\Vantage\Listeners\RecordJobSuccess;
+use Storvia\Vantage\Models\VantageJob;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
 use Illuminate\Queue\Events\JobProcessing;

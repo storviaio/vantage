@@ -1,6 +1,6 @@
 <?php
 
-namespace HoudaSlassi\Vantage;
+namespace Storvia\Vantage;
 
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;

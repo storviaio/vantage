@@ -1,6 +1,6 @@
 <?php
 
-use HoudaSlassi\Vantage\Support\JobPerformanceContext;
+use Storvia\Vantage\Support\JobPerformanceContext;
 
 beforeEach(function () {
     // Clear baselines before each test

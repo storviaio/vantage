@@ -1,10 +1,10 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Tests\Feature;
+namespace Storvia\Vantage\Tests\Feature;
 
-use HoudaSlassi\Vantage\Http\Controllers\QueueMonitorController;
-use HoudaSlassi\Vantage\Models\VantageJob;
-use HoudaSlassi\Vantage\Vantage;
+use Storvia\Vantage\Http\Controllers\QueueMonitorController;
+use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Vantage;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Str;
 

@@ -1,9 +1,9 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Console\Commands;
+namespace Storvia\Vantage\Console\Commands;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
-use HoudaSlassi\Vantage\Support\TagAggregator;
+use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\TagAggregator;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 

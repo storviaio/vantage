@@ -1,8 +1,8 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Console\Commands;
+namespace Storvia\Vantage\Console\Commands;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
+use Storvia\Vantage\Models\VantageJob;
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Http\Middleware;
+namespace Storvia\Vantage\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;

@@ -1,8 +1,8 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Notifications;
+namespace Storvia\Vantage\Notifications;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
+use Storvia\Vantage\Models\VantageJob;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;

@@ -1,10 +1,10 @@
 <?php
 
-namespace HoudaSlassi\Vantage;
+namespace Storvia\Vantage;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
-use HoudaSlassi\Vantage\Support\QueueDepthChecker;
-use HoudaSlassi\Vantage\Support\VantageLogger;
+use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\QueueDepthChecker;
+use Storvia\Vantage\Support\VantageLogger;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 

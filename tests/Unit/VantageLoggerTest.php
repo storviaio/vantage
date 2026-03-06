@@ -1,6 +1,6 @@
 <?php
 
-use HoudaSlassi\Vantage\Support\VantageLogger;
+use Storvia\Vantage\Support\VantageLogger;
 use Illuminate\Support\Facades\Log;
 
 it('logs when enabled', function () {

@@ -1,7 +1,7 @@
 <?php
 
-use HoudaSlassi\Vantage\Http\Controllers\QueueMonitorController;
-use HoudaSlassi\Vantage\Http\Middleware\AuthorizeVantage;
+use Storvia\Vantage\Http\Controllers\QueueMonitorController;
+use Storvia\Vantage\Http\Middleware\AuthorizeVantage;
 use Illuminate\Support\Facades\Route;
 
 $prefix = trim(config('vantage.route_prefix', 'vantage'), '/');

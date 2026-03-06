@@ -1,6 +1,6 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Support;
+namespace Storvia\Vantage\Support;
 
 use Illuminate\Support\Facades\Log;
 

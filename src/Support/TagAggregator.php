@@ -1,8 +1,8 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Support;
+namespace Storvia\Vantage\Support;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
+use Storvia\Vantage\Models\VantageJob;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;

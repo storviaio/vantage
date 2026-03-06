@@ -1,13 +1,13 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Listeners;
+namespace Storvia\Vantage\Listeners;
 
-use HoudaSlassi\Vantage\Models\VantageJob;
-use HoudaSlassi\Vantage\Support\JobPerformanceContext;
-use HoudaSlassi\Vantage\Support\PayloadExtractor;
-use HoudaSlassi\Vantage\Support\TagExtractor;
-use HoudaSlassi\Vantage\Support\Traits\ExtractsRetryOf;
-use HoudaSlassi\Vantage\Support\VantageLogger;
+use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\JobPerformanceContext;
+use Storvia\Vantage\Support\PayloadExtractor;
+use Storvia\Vantage\Support\TagExtractor;
+use Storvia\Vantage\Support\Traits\ExtractsRetryOf;
+use Storvia\Vantage\Support\VantageLogger;
 use Illuminate\Queue\Events\JobProcessed;
 
 class RecordJobSuccess

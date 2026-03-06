@@ -1,7 +1,7 @@
 <?php
 
-use HoudaSlassi\Vantage\Listeners\RecordJobSuccess;
-use HoudaSlassi\Vantage\Models\VantageJob;
+use Storvia\Vantage\Listeners\RecordJobSuccess;
+use Storvia\Vantage\Models\VantageJob;
 use Illuminate\Queue\Events\JobProcessed;
 
 it('skips counting released jobs as processed', function () {

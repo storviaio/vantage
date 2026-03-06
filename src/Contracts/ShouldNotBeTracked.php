@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-namespace HoudaSlassi\Vantage\Contracts;
+namespace Storvia\Vantage\Contracts;
 
 interface ShouldNotBeTracked {}

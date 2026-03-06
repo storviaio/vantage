@@ -1,10 +1,10 @@
 # Vantage
 
-[![Latest Version on Packagist](https://img.shields.io/packagist/v/houdaslassi/vantage.svg?style=flat-square)](https://packagist.org/packages/houdaslassi/vantage)
-[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/houdaslassi/vantage/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/houdaslassi/vantage/actions?query=workflow%3Arun-tests+branch%3Amain)
-[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/houdaslassi/vantage/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/houdaslassi/vantage/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
-[![Total Downloads](https://img.shields.io/packagist/dt/houdaslassi/vantage.svg?style=flat-square)](https://packagist.org/packages/houdaslassi/vantage)
-[![License](https://img.shields.io/packagist/l/houdaslassi/vantage.svg?style=flat-square)](https://packagist.org/packages/houdaslassi/vantage)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/storviaio/vantage.svg?style=flat-square)](https://packagist.org/packages/storviaio/vantage)
+[![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/storviaio/vantage/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/storviaio/vantage/actions?query=workflow%3Arun-tests+branch%3Amain)
+[![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/storviaio/vantage/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/storviaio/vantage/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
+[![Total Downloads](https://img.shields.io/packagist/dt/storviaio/vantage.svg?style=flat-square)](https://packagist.org/packages/storviaio/vantage)
+[![License](https://img.shields.io/packagist/l/storviaio/vantage.svg?style=flat-square)](https://packagist.org/packages/storviaio/vantage)
 
 A Laravel package that tracks and monitors your queue jobs. 
 Automatically records job execution history, failures, retries, 
@@ -13,7 +13,7 @@ and provides a simple web interface to view everything.
 ## Installation
 
 ```bash
-composer require houdaslassi/vantage
+composer require storviaio/vantage
 php artisan vendor:publish --tag=vantage-config
 php artisan migrate
 ```
@@ -131,7 +131,7 @@ Or use the web interface - just click retry on any failed job.
 Vantage provides a convenient facade for easy programmatic access to queue monitoring data. The facade is automatically registered and ready to use:
 
 ```php
-use HoudaSlassi\Vantage\Facades\Vantage;
+use Storvia\Vantage\Facades\Vantage;
 
 // Get queue depth for all queues
 $depths = Vantage::queueDepth();
@@ -301,7 +301,7 @@ if you want to exclude some jobs from being tracked by Vantage, you can add them
 Or implement the 'ShouldNotBeTracked' class.
 
 ```php
-use HoudaSlassi\Vantage\Contracts\ShouldNotBeTracked;
+use Storvia\Vantage\Contracts\ShouldNotBeTracked;
 
 class MyNoisyJob implements ShouldQueue, ShouldNotBeTracked
 {
@@ -316,7 +316,7 @@ class MyNoisyJob implements ShouldQueue, ShouldNotBeTracked
 Vantage includes a comprehensive model factory for creating test data in your application tests:
 
 ```php
-use HoudaSlassi\Vantage\Models\VantageJob;
+use Storvia\Vantage\Models\VantageJob;
 
 // Create test jobs
 $job = VantageJob::factory()->create();

@@ -1,8 +1,8 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Tests;
+namespace Storvia\Vantage\Tests;
 
-use HoudaSlassi\Vantage\VantageServiceProvider;
+use Storvia\Vantage\VantageServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Orchestra\Testbench\TestCase as Orchestra;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Models;
+namespace Storvia\Vantage\Models;
 
-use HoudaSlassi\Vantage\Database\Factories\VantageJobFactory;
+use Storvia\Vantage\Database\Factories\VantageJobFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 

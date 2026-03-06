@@ -1,6 +1,6 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Console\Commands;
+namespace Storvia\Vantage\Console\Commands;
 
 use Illuminate\Bus\Queueable;
 use Illuminate\Console\Command;

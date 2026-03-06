@@ -1,6 +1,6 @@
 <?php
 
-namespace HoudaSlassi\Vantage\Tests;
+namespace Storvia\Vantage\Tests;
 
 class CustomRoutePrefixTestCase extends TestCase
 {

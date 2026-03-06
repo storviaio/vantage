@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace HoudaSlassi\Vantage\Listeners;
+namespace Storvia\Vantage\Listeners;
 
-use HoudaSlassi\Vantage\Contracts\ShouldNotBeTracked;
+use Storvia\Vantage\Contracts\ShouldNotBeTracked;
 
 trait ChecksJobExclusion
 {
