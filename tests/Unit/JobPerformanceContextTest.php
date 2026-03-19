@@ -4,7 +4,7 @@ use Storvia\Vantage\Support\JobPerformanceContext;
 
 beforeEach(function () {
     // Clear baselines before each test
-    $reflection = new \ReflectionClass(JobPerformanceContext::class);
+    $reflection = new ReflectionClass(JobPerformanceContext::class);
     $property = $reflection->getProperty('baselines');
     $property->setAccessible(true);
     $property->setValue(null, []);

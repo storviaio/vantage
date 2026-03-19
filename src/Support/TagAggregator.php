@@ -2,6 +2,8 @@
 
 namespace Storvia\Vantage\Support;
 
+use Carbon\Carbon;
+use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -28,7 +30,7 @@ class TagAggregator
 
     protected string $connectionName;
 
-    protected \Illuminate\Database\Connection $connection;
+    protected Connection $connection;
 
     protected string $jobsTable;
 
@@ -47,7 +49,7 @@ class TagAggregator
     /**
      * Get top tags with statistics, using the most efficient method available.
      *
-     * @param  \Carbon\Carbon  $since  Filter jobs created after this date
+     * @param  Carbon  $since  Filter jobs created after this date
      * @param  int  $limit  Maximum number of tags to return
      * @return Collection Collection of tag statistics
      */
@@ -65,7 +67,7 @@ class TagAggregator
     /**
      * Get detailed tag statistics including duration averages.
      *
-     * @param  \Carbon\Carbon  $since  Filter jobs created after this date
+     * @param  Carbon  $since  Filter jobs created after this date
      * @return array Associative array of tag => statistics
      */
     public function getTagStats($since): array
@@ -602,7 +604,7 @@ class TagAggregator
      *
      * @param  int  $jobId  The job ID
      * @param  array  $tags  Array of tag strings
-     * @param  \Carbon\Carbon|null  $createdAt  The job's created_at timestamp
+     * @param  Carbon|null  $createdAt  The job's created_at timestamp
      */
     public function insertJobTags(int $jobId, array $tags, $createdAt = null): void
     {
@@ -665,7 +667,7 @@ class TagAggregator
      * Delete old tags based on job created_at timestamp.
      * Used by the prune command.
      *
-     * @param  \Carbon\Carbon  $before  Delete tags for jobs created before this date
+     * @param  Carbon  $before  Delete tags for jobs created before this date
      * @return int Number of tags deleted
      */
     public function pruneOldTags($before): int

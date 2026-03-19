@@ -112,7 +112,7 @@ it('updates same record from processing to failed', function () {
         'started_at' => now()->subSeconds(5),
     ]);
 
-    $exception = new \Exception('Test exception message');
+    $exception = new Exception('Test exception message');
     $job = new class
     {
         public $queue = 'default';
@@ -234,7 +234,7 @@ it('records job failure with exception details', function () {
         }
     };
 
-    $exception = new \Exception('Test error message', 500);
+    $exception = new Exception('Test error message', 500);
 
     $event = new JobFailed('test-connection', $job, $exception);
     $listener = new RecordJobFailure;

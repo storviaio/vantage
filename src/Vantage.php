@@ -2,9 +2,12 @@
 
 namespace Storvia\Vantage;
 
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Jobs\Job;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\JobRestorer;
 use Storvia\Vantage\Support\QueueDepthChecker;
 use Storvia\Vantage\Support\VantageLogger;
 
@@ -106,13 +109,13 @@ class Vantage
         }
 
         // Validate it's a valid job class (implements ShouldQueue or extends Job)
-        if (! is_subclass_of($expectedJobClass, \Illuminate\Contracts\Queue\ShouldQueue::class) &&
-            ! is_subclass_of($expectedJobClass, \Illuminate\Queue\Jobs\Job::class)) {
+        if (! is_subclass_of($expectedJobClass, ShouldQueue::class) &&
+            ! is_subclass_of($expectedJobClass, Job::class)) {
             return false;
         }
 
         // Try to restore job from payload with safety checks
-        $command = $this->restoreJobFromPayload($job, $expectedJobClass);
+        $command = app(JobRestorer::class)->restore($job, $expectedJobClass);
 
         if (! $command) {
             // Only allow fallback if payload is completely missing (not corrupted/malicious)
@@ -139,53 +142,6 @@ class Vantage
         dispatch($command)->onQueue($job->queue ?? 'default');
 
         return true;
-    }
-
-    /**
-     * Safely restore job from payload with security checks.
-     */
-    protected function restoreJobFromPayload(VantageJob $job, string $expectedJobClass): ?object
-    {
-        if (! $job->payload) {
-            return null;
-        }
-
-        try {
-            $payload = is_array($job->payload) ? $job->payload : json_decode($job->payload, true);
-
-            if (! is_array($payload)) {
-                return null;
-            }
-
-            // Try new format first (from PayloadExtractor)
-            $serialized = $payload['raw_payload']['data']['command'] ?? null;
-
-            // Fallback to old format
-            if (! $serialized) {
-                $serialized = $payload['data']['command'] ?? null;
-            }
-
-            if (! $serialized || ! is_string($serialized)) {
-                return null;
-            }
-
-            // Unserialize with allowed_classes restriction - only allow the expected class
-            $command = @unserialize($serialized, ['allowed_classes' => [$expectedJobClass]]);
-
-            // Validate the result
-            if (! is_object($command)) {
-                return null;
-            }
-
-            // Double-check the class matches
-            if (! $command instanceof $expectedJobClass) {
-                return null;
-            }
-
-            return $command;
-        } catch (\Throwable $e) {
-            return null;
-        }
     }
 
     /**

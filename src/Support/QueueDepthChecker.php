@@ -5,6 +5,7 @@ namespace Storvia\Vantage\Support;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Redis;
+use Storvia\Vantage\Models\VantageJob;
 
 class QueueDepthChecker
 {
@@ -153,7 +154,7 @@ class QueueDepthChecker
         // For unsupported drivers, we can still show what we know from job_runs
         // Count jobs that are processing or recently started (might be queued)
         try {
-            $query = \Storvia\Vantage\Models\VantageJob::where('status', 'processing');
+            $query = VantageJob::where('status', 'processing');
 
             if ($queueName) {
                 $query->where('queue', $queueName);

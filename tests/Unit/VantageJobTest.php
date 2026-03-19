@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 use Storvia\Vantage\Models\VantageJob;
 
@@ -45,8 +46,8 @@ it('casts dates correctly', function () {
         'finished_at' => '2024-01-01 10:05:00',
     ]);
 
-    expect($job->started_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class)
-        ->and($job->finished_at)->toBeInstanceOf(\Illuminate\Support\Carbon::class);
+    expect($job->started_at)->toBeInstanceOf(Carbon::class)
+        ->and($job->finished_at)->toBeInstanceOf(Carbon::class);
 });
 
 it('has retried_from relationship', function () {

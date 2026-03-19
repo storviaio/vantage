@@ -9,6 +9,7 @@ use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\JobRestorer;
 use Storvia\Vantage\Support\QueueDepthChecker;
 use Storvia\Vantage\Support\TagAggregator;
 use Storvia\Vantage\Support\VantageLogger;
@@ -424,7 +425,7 @@ class QueueMonitorController extends Controller
             }
 
             // Safely restore job from payload with security checks
-            $job = $this->restoreJobFromPayload($run, $jobClass);
+            $job = app(JobRestorer::class)->restore($run, $jobClass);
 
             if (! $job) {
                 return back()->with('error', 'Unable to restore job. Payload might be missing or corrupted.');
@@ -447,92 +448,6 @@ class QueueMonitorController extends Controller
             ]);
 
             return back()->with('error', 'Retry failed: '.$e->getMessage());
-        }
-    }
-
-    /**
-     * Safely restore job from payload with security checks.
-     *
-     * @param  VantageJob  $run  The job run record
-     * @param  string  $expectedJobClass  The expected job class name for validation
-     * @return object|null The restored job object or null on failure
-     */
-    protected function restoreJobFromPayload(VantageJob $run, string $expectedJobClass): ?object
-    {
-        if (! $run->payload) {
-            return null;
-        }
-
-        // Validate expected class exists and is a valid job class
-        if (! class_exists($expectedJobClass)) {
-            VantageLogger::warning('Vantage: Expected job class does not exist', [
-                'run_id' => $run->id,
-                'expected_class' => $expectedJobClass,
-            ]);
-
-            return null;
-        }
-
-        try {
-            $payload = is_array($run->payload) ? $run->payload : json_decode($run->payload, true);
-
-            if (! is_array($payload)) {
-                VantageLogger::warning('Vantage: Invalid payload format', ['run_id' => $run->id]);
-
-                return null;
-            }
-
-            // Get the serialized command from Laravel's raw payload
-            $serialized = $payload['raw_payload']['data']['command'] ?? null;
-
-            // Fallback to old format if new format not available
-            if (! $serialized) {
-                $serialized = $payload['data']['command'] ?? null;
-            }
-
-            if (! $serialized || ! is_string($serialized)) {
-                VantageLogger::warning('Vantage: No serialized command in payload', ['run_id' => $run->id]);
-
-                return null;
-            }
-
-            // Unserialize with security: only allow the expected job class
-            $job = @unserialize($serialized, ['allowed_classes' => [$expectedJobClass]]);
-
-            if (! is_object($job)) {
-                VantageLogger::warning('Vantage: Unserialize did not return object', [
-                    'run_id' => $run->id,
-                    'result_type' => gettype($job),
-                ]);
-
-                return null;
-            }
-
-            // Double-check the class matches the expected class (security validation)
-            if (! $job instanceof $expectedJobClass) {
-                VantageLogger::warning('Vantage: Unserialized job class does not match expected class', [
-                    'run_id' => $run->id,
-                    'expected_class' => $expectedJobClass,
-                    'actual_class' => get_class($job),
-                ]);
-
-                return null;
-            }
-
-            VantageLogger::info('Vantage: Successfully restored job', [
-                'run_id' => $run->id,
-                'job_class' => get_class($job),
-            ]);
-
-            return $job;
-
-        } catch (\Throwable $e) {
-            VantageLogger::error('Vantage: Exception while restoring job from payload', [
-                'run_id' => $run->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            return null;
         }
     }
 

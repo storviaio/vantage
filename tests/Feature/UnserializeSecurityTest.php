@@ -2,10 +2,11 @@
 
 namespace Storvia\Vantage\Tests\Feature;
 
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Str;
-use Storvia\Vantage\Http\Controllers\QueueMonitorController;
 use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\JobRestorer;
 use Storvia\Vantage\Vantage;
 
 beforeEach(function () {
@@ -14,7 +15,7 @@ beforeEach(function () {
 
 class TestSecureJob implements ShouldQueue
 {
-    use \Illuminate\Bus\Queueable;
+    use Queueable;
 
     public $testProperty;
 
@@ -158,8 +159,8 @@ it('rejects non-job class in Vantage::retryJob', function () {
     expect($result)->toBeFalse();
 });
 
-it('prevents unserializing malicious classes in QueueMonitorController::restoreJobFromPayload', function () {
-    $controller = new QueueMonitorController;
+it('prevents unserializing malicious classes in JobRestorer::restore', function () {
+    $restorer = new JobRestorer;
 
     $maliciousSerialized = 'O:15:"MaliciousClass":0:{}';
 
@@ -177,17 +178,13 @@ it('prevents unserializing malicious classes in QueueMonitorController::restoreJ
         ]),
     ]);
 
-    $reflection = new \ReflectionClass($controller);
-    $method = $reflection->getMethod('restoreJobFromPayload');
-    $method->setAccessible(true);
-
-    $result = $method->invoke($controller, $job, TestSecureJob::class);
+    $result = $restorer->restore($job, TestSecureJob::class);
 
     expect($result)->toBeNull();
 });
 
-it('prevents unserializing wrong class in QueueMonitorController::restoreJobFromPayload', function () {
-    $controller = new QueueMonitorController;
+it('prevents unserializing wrong class in JobRestorer::restore', function () {
+    $restorer = new JobRestorer;
 
     $job = VantageJob::create([
         'uuid' => Str::uuid(),
@@ -203,17 +200,13 @@ it('prevents unserializing wrong class in QueueMonitorController::restoreJobFrom
         ]),
     ]);
 
-    $reflection = new \ReflectionClass($controller);
-    $method = $reflection->getMethod('restoreJobFromPayload');
-    $method->setAccessible(true);
-
-    $result = $method->invoke($controller, $job, TestSecureJob::class);
+    $result = $restorer->restore($job, TestSecureJob::class);
 
     expect($result)->toBeNull();
 });
 
-it('allows restoring valid job in QueueMonitorController::restoreJobFromPayload', function () {
-    $controller = new QueueMonitorController;
+it('allows restoring valid job in JobRestorer::restore', function () {
+    $restorer = new JobRestorer;
 
     $testJob = new TestSecureJob('test-value');
     $job = VantageJob::create([
@@ -230,11 +223,7 @@ it('allows restoring valid job in QueueMonitorController::restoreJobFromPayload'
         ]),
     ]);
 
-    $reflection = new \ReflectionClass($controller);
-    $method = $reflection->getMethod('restoreJobFromPayload');
-    $method->setAccessible(true);
-
-    $result = $method->invoke($controller, $job, TestSecureJob::class);
+    $result = $restorer->restore($job, TestSecureJob::class);
 
     expect($result)->not->toBeNull()
         ->and($result)->toBeInstanceOf(TestSecureJob::class)
