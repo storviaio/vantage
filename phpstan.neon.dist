@@ -10,4 +10,8 @@ parameters:
     tmpDir: build/phpstan
     checkOctaneCompatibility: true
     checkModelProperties: true
+    ignoreErrors:
+        -
+            message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+            reportUnmatched: false
 

@@ -31,12 +31,6 @@ parameters:
 			path: src/Console/Commands/RetryFailedJob.php
 
 		-
-			message: '#^Property Storvia\\Vantage\\Models\\VantageJob\:\:\$connection \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
-			count: 1
-			path: src/Console/Commands/RetryFailedJob.php
-
-		-
 			message: '''
 				#^Call to deprecated method get\(\) of class Illuminate\\Http\\Request\:
 				since Symfony 7\.4, use properties `\-\>attributes`, `query` or `request` directly instead$#

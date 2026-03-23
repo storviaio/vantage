@@ -13,7 +13,7 @@ use Storvia\Vantage\Database\Factories\VantageJobFactory;
  * @property string $job_uuid
  * @property string $job_class
  * @property string $queue
- * @property string $connection
+ * @property string|null $connection
  * @property int $attempt
  * @property int|null $retried_from_id
  * @property array|null $payload
