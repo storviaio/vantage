@@ -27,7 +27,7 @@ The package will automatically register itself using
 
 ### Requirements
 
-- Laravel 10.x, 11.x, or 12.x
+- Laravel 10.x, 11.x, 12.x, or 13.x
 - PHP 8.2, 8.3, or 8.4
 - One of the following databases:
   - MySQL 5.7+ / MariaDB 10.3+
