@@ -24,13 +24,22 @@ jobs:
         php: [8.4, 8.3, 8.2]
         laravel: [13.*, 12.*, 11.*]
         stability: [prefer-stable]
+        exclude:
+          - laravel: 13.*
+            php: 8.2
         include:
           - laravel: 13.*
             testbench: 11.*
+            pest: "^4.0"
+            pest-laravel: "^4.0"
           - laravel: 12.*
             testbench: 10.*
+            pest: "^3.8"
+            pest-laravel: "^3.0"
           - laravel: 11.*
             testbench: 9.*
+            pest: "^3.8"
+            pest-laravel: "^3.0"
 
     name: P${{ matrix.php }} - L${{ matrix.laravel }} - ${{ matrix.stability }}
 
@@ -52,7 +61,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "pestphp/pest:${{ matrix.pest }}" "pestphp/pest-plugin-laravel:${{ matrix.pest-laravel }}" --dev --no-interaction --no-update
           composer update --${{ matrix.stability }} --prefer-dist --no-interaction
 
       - name: List Installed Dependencies
