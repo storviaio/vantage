@@ -61,9 +61,14 @@ class VantageServiceProvider extends ServiceProvider
         // Load views
         $this->loadViewsFrom(__DIR__.'/../resources/views', 'vantage');
 
-        // Load routes if enabled
+        // Load web routes if enabled
         if (config('vantage.routes', true)) {
             $this->loadRoutesFrom(__DIR__.'/../routes/web.php');
+        }
+
+        // Load API routes if enabled
+        if (config('vantage.api.enabled', false)) {
+            $this->loadRoutesFrom(__DIR__.'/../routes/api.php');
         }
 
         // Listen to Laravel's built-in queue events
