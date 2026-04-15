@@ -16,6 +16,7 @@ use Storvia\Vantage\Database\Factories\VantageJobFactory;
  * @property string|null $connection
  * @property int $attempt
  * @property int|null $retried_from_id
+ * @property VantageJob|null $retriedFrom
  * @property array|null $payload
  * @property array|null $job_tags
  * @property string|null $exception_class

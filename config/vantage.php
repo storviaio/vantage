@@ -110,6 +110,28 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | JSON API
+    |--------------------------------------------------------------------------
+    |
+    | Expose a JSON API for external consumption (dashboards, CLI tools, etc.).
+    | The API is independent of the web dashboard and uses Bearer-token auth
+    | instead of the Gate/session-based auth used by the Blade views.
+    |
+    | Set `api.token` to a strong random string and pass it as:
+    |   Authorization: Bearer <token>
+    |
+    | If the token contains =, +, #, or spaces, wrap the value in double quotes
+    | in your .env file (e.g. VANTAGE_API_TOKEN="...") so it is not truncated.
+    |
+    */
+    'api' => [
+        'enabled' => env('VANTAGE_API_ENABLED', false),
+        'token' => env('VANTAGE_API_TOKEN'),
+        'prefix' => env('VANTAGE_API_PREFIX', 'api/vantage'),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Performance Telemetry
     |--------------------------------------------------------------------------
     |
