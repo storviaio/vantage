@@ -110,6 +110,7 @@ it('updates same record from processing to failed', function () {
         'job_class' => 'App\\Jobs\\TestJob',
         'status' => 'processing',
         'started_at' => now()->subSeconds(5),
+        'attempt' => 1,
     ]);
 
     $exception = new Exception('Test exception message');
@@ -154,6 +155,60 @@ it('updates same record from processing to failed', function () {
 
     // Verify no duplicate records were created
     expect(VantageJob::where('uuid', 'test-uuid-failed')->count())->toBe(1);
+});
+
+it('updates latest attempt record from processing to failed', function () {
+    // Create a processing record first (job failed only fires once all tries are exhausted, so this will be processing)
+    $jobRun = VantageJob::create([
+        'uuid' => 'test-uuid-failed',
+        'job_class' => 'App\\Jobs\\TestJob',
+        'status' => 'processing',
+        'started_at' => now()->subSeconds(5),
+        'attempt' => 1,
+    ]);
+
+    // Create a processing record for the automatic retry
+    $jobRun2 = VantageJob::create([
+        'uuid' => 'test-uuid-failed',
+        'job_class' => 'App\\Jobs\\TestJob',
+        'status' => 'processing',
+        'started_at' => now()->subSeconds(3),
+        'attempt' => 2,
+    ]);
+
+    $exception = new Exception('Test exception message');
+    $job = new class
+    {
+        public $queue = 'default';
+        public $tries = 2;
+
+        public function getQueue()
+        {
+            return $this->queue;
+        }
+
+        public function attempts()
+        {
+            return 2;
+        }
+
+        public function uuid()
+        {
+            return 'test-uuid-failed';
+        }
+
+        public function resolveName()
+        {
+            return 'App\\Jobs\\TestJob';
+        }
+    };
+
+    $event = new JobFailed('test-connection', $job, $exception);
+    $listener = new RecordJobFailure;
+    $listener->handle($event);
+
+    // Verify both job records were updated
+    expect(VantageJob::where('uuid', 'test-uuid-failed')->where('status', 'failed')->count())->toBe(2);
 });
 
 it('updates same record from processing to processed', function () {
