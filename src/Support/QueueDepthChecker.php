@@ -31,8 +31,9 @@ class QueueDepthChecker
     {
         try {
             $table = config("queue.connections.{$connection}.table", 'jobs');
+            $dbConnection = config("queue.connections.{$connection}.connection", config('database.default'));
 
-            $query = DB::table($table)
+            $query = DB::connection($dbConnection)->table($table)
                 ->whereNull('reserved_at')
                 ->where('attempts', 0);
 
@@ -42,7 +43,7 @@ class QueueDepthChecker
                 return [$queueName ?: 'default' => $count];
             } else {
                 // Get depths for all queues
-                $queues = DB::table($table)
+                $queues = DB::connection($dbConnection)->table($table)
                     ->whereNull('reserved_at')
                     ->where('attempts', 0)
                     ->distinct()
@@ -51,7 +52,7 @@ class QueueDepthChecker
 
                 $depths = [];
                 foreach ($queues as $queue) {
-                    $count = DB::table($table)
+                    $count = DB::connection($dbConnection)->table($table)
                         ->where('queue', $queue)
                         ->whereNull('reserved_at')
                         ->where('attempts', 0)
@@ -62,7 +63,7 @@ class QueueDepthChecker
 
                 // If no jobs found, still check default queue
                 if (empty($depths)) {
-                    $defaultCount = DB::table($table)
+                    $defaultCount = DB::connection($dbConnection)->table($table)
                         ->where('queue', 'default')
                         ->whereNull('reserved_at')
                         ->where('attempts', 0)
