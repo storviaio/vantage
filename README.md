@@ -6,11 +6,25 @@
 [![Total Downloads](https://img.shields.io/packagist/dt/storviaio/vantage.svg?style=flat-square)](https://packagist.org/packages/storviaio/vantage)
 [![License](https://img.shields.io/packagist/l/storviaio/vantage.svg?style=flat-square)](https://packagist.org/packages/storviaio/vantage)
 
-A Laravel package that tracks and monitors your queue jobs. 
-Automatically records job execution history, failures, retries, 
+A Laravel package that tracks and monitors your queue jobs.
+Automatically records job execution history, failures, retries,
 and provides a simple web interface to view everything.
 
-## Installation
+## Requirements
+
+- Laravel 10.x, 11.x, 12.x, or 13.x
+- PHP 8.2, 8.3, or 8.4
+- One of the following databases:
+    - MySQL 5.7+ / MariaDB 10.3+
+    - PostgreSQL 9.6+
+    - SQLite 3.8.8+
+
+## Quickstart
+
+Three steps get you from zero to a production-ready setup: installing the package, locking down who can view the
+dashboard, and scheduling automatic pruning so the `vantage_jobs` table doesn't grow unbounded.
+
+### 1. Install the package
 
 ```bash
 composer require storviaio/vantage
@@ -18,31 +32,68 @@ php artisan vendor:publish --tag=vantage-config
 php artisan migrate
 ```
 
-The package will automatically register itself using
+The package registers itself automatically — no service provider entry required. Once migrated, the dashboard is live at
+`/vantage`.
 
-**Publishing Assets:**
+### 2. Define the authorization guard
+
+The dashboard is protected by the `viewVantage` gate. By default any authenticated user may access it, so restrict it to
+the people who should see your queue internals. Add the gate to your `AppServiceProvider`:
+
+```php
+use Illuminate\Support\Facades\Gate;
+
+public function boot(): void
+{
+    Gate::define('viewVantage', function ($user = null) {
+        return optional($user)->isAdmin();
+    });
+}
+```
+
+The gate receives the authenticated user instance, or `null` when no one is logged in. Return `true`/`false` to allow or
+deny. To open the dashboard to everyone, return `true` even for guests, or set `VANTAGE_AUTH_ENABLED=false`.
+See [Authentication](#authentication) for more.
+
+### 3. Schedule the prune command
+
+Keep the table lean by pruning old job records on a schedule. In `routes/console.php`:
+
+```php
+use Illuminate\Support\Facades\Schedule;
+
+// Prune jobs older than retention_days config (VANTAGE_RETENTION_DAYS, default: 14 days)
+// --force skips the confirmation prompt (required for scheduled tasks)
+// --keep-processing preserves active jobs
+Schedule::command('vantage:prune --force --keep-processing')
+    ->daily()
+    ->at('02:00');
+```
+
+Omit `--days` to use the `vantage.retention_days` config value automatically. See [Prune Old Jobs](#prune-old-jobs) for
+all available options.
+
+That's it — your dashboard is access-controlled and your job history is self-cleaning.
+
+### Publishing Assets ###
+
 - Config: `php artisan vendor:publish --tag=vantage-config`
 - Views: `php artisan vendor:publish --tag=vantage-views` (optional, for customization)
-- Migrations: Automatically loaded, but you can publish with `php artisan vendor:publish --tag=vantage-migrations` if needed
-
-### Requirements
-
-- Laravel 10.x, 11.x, 12.x, or 13.x
-- PHP 8.2, 8.3, or 8.4
-- One of the following databases:
-  - MySQL 5.7+ / MariaDB 10.3+
-  - PostgreSQL 9.6+
-  - SQLite 3.8.8+
+- Migrations: Automatically loaded, but you can publish with `php artisan vendor:publish --tag=vantage-migrations` if
+  needed
 
 ## Features
 
 ### Universal Queue Driver Support
 
-**Works with all Laravel queue drivers** - database, Redis, SQS, Beanstalkd, and any other driver. Unlike other monitoring tools that require specific drivers, Vantage tracks jobs from **any queue driver** and saves all data to your database for persistent tracking and analysis.
+**Works with all Laravel queue drivers** - database, Redis, SQS, Beanstalkd, and any other driver. Unlike other
+monitoring tools that require specific drivers, Vantage tracks jobs from **any queue driver** and saves all data to your
+database for persistent tracking and analysis.
 
 ### Job Tracking
 
 Every job gets tracked in the `vantage_jobs` table with:
+
 - Job class, queue, connection
 - Status (processing, processed, failed)
 - Start/finish times and duration
@@ -51,7 +102,8 @@ Every job gets tracked in the `vantage_jobs` table with:
 
 ### Failure Details
 
-When jobs fail, we store the exception class, message, and full stack trace. Much easier to debug than Laravel's default failed_jobs table.
+When jobs fail, we store the exception class, message, and full stack trace. Much easier to debug than Laravel's default
+failed_jobs table.
 
 Visit `/vantage/failed` to see all failed jobs with exception details and retry options.
 
@@ -64,6 +116,7 @@ Visit `/vantage/failed` to see all failed jobs with exception details and retry 
 Visit `/vantage` to access the comprehensive monitoring dashboard:
 
 **Dashboard** (`/vantage`) - Overview of your queue system:
+
 - **Statistics Cards**: Total jobs, processed, failed, processing, and success rate
 - **Queue Depth Monitoring**: Real-time pending job counts per queue with health status
 - **Success Rate Trend Chart**: Visual representation of job success/failure over time
@@ -78,6 +131,7 @@ Visit `/vantage` to access the comprehensive monitoring dashboard:
 **Recent Jobs Table** - Quick view of the latest 20 jobs with status, duration, and quick actions:
 
 The Recent Jobs table appears on the dashboard showing:
+
 - Job ID, class name, and queue
 - Tags associated with each job
 - Status indicators (Processing, Processed, Failed)
@@ -91,6 +145,7 @@ The Recent Jobs table appears on the dashboard showing:
 **Jobs List** - View and filter all jobs with advanced filtering options:
 
 Visit `/vantage/jobs` to access the jobs list with powerful filtering capabilities:
+
 - Filter by status (processed, failed, processing)
 - Filter by queue name
 - Filter by job class (partial match supported)
@@ -106,6 +161,7 @@ Filter jobs by status, queue, job class, tags, and date range:
 ![Jobs List with Filters](screenshots/vantage_08.png)
 
 **Job Details** (`/vantage/jobs/{id}`) - Comprehensive job information:
+
 - **Basic Information**: Status, UUID, queue, connection, job class
 - **Timing**: Start time, finish time, duration
 - **Exception Details**: Full exception class, message, and stack trace for failed jobs
@@ -114,7 +170,8 @@ Filter jobs by status, queue, job class, tags, and date range:
 - **Retry Chain**: View original job and all retry attempts
 - **Quick Actions**: Retry failed jobs directly from the details page
 
-**Note:** The dashboard requires authentication by default. Make sure you're logged in, or customize the `viewVantage` gate / `VANTAGE_AUTH_ENABLED` setting (explained below) if you need different behavior.
+**Note:** The dashboard requires authentication by default. Make sure you're logged in, or customize the `viewVantage`
+gate / `VANTAGE_AUTH_ENABLED` setting (explained below) if you need different behavior.
 
 ### Retry Failed Jobs
 
@@ -128,7 +185,8 @@ Or use the web interface - just click retry on any failed job.
 
 ### Programmatic Access
 
-Vantage provides a convenient facade for easy programmatic access to queue monitoring data. The facade is automatically registered and ready to use:
+Vantage provides a convenient facade for easy programmatic access to queue monitoring data. The facade is automatically
+registered and ready to use:
 
 ```php
 use Storvia\Vantage\Facades\Vantage;
@@ -162,6 +220,7 @@ if (Vantage::enabled()) {
 ```
 
 **Available Facade Methods:**
+
 - `queueDepth(?string $queue = null)` - Get queue depths for all or specific queues
 - `jobsByStatus(string $status, int $limit = 50)` - Get jobs by status (processing, processed, failed)
 - `failedJobs(int $limit = 50)` - Get failed jobs
@@ -178,7 +237,8 @@ if (Vantage::enabled()) {
 
 Jobs with tags (using Laravel's `tags()` method) are automatically tracked. Visit `/vantage/tags` to see:
 
-- **Tags Analytics**: View statistics for all tags (total jobs, processed, failed, processing, success rate, average duration)
+- **Tags Analytics**: View statistics for all tags (total jobs, processed, failed, processing, success rate, average
+  duration)
 - **Search**: Filter tags by name in real-time
 - **Sortable Columns**: Click any column header to sort by that metric
 - **Clickable Tags**: Click a tag to view all jobs with that tag
@@ -190,11 +250,13 @@ Filter and view jobs by tag in the web interface.
 
 ### Queue Depth Monitoring
 
-Real-time queue depth tracking for all your queues. See how many jobs are pending in each queue with health status indicators.
+Real-time queue depth tracking for all your queues. See how many jobs are pending in each queue with health status
+indicators.
 
 ![Queue Depth](screenshots/vantage_10.png)
 
 Visit `/vantage` to see queue depths displayed with:
+
 - Current pending job count per queue
 - Health status (healthy/normal/warning/critical)
 - Support for database and Redis queue drivers
@@ -202,6 +264,7 @@ Visit `/vantage` to see queue depths displayed with:
 ### Performance Telemetry
 
 Vantage automatically tracks performance metrics for your jobs:
+
 - Memory usage (start, end, peak)
 - CPU time (user and system)
 - Execution duration
@@ -239,6 +302,7 @@ VANTAGE_ENABLED=false
 ```
 
 When disabled:
+
 - No job tracking occurs
 - Routes are not registered
 - Event listeners are not active
@@ -250,13 +314,15 @@ Perfect for testing in staging without affecting production data!
 
 ### Multi-Database Support
 
-If your application uses multiple databases, you can specify which database connection to use for storing queue job runs:
+If your application uses multiple databases, you can specify which database connection to use for storing queue job
+runs:
 
 ```env
 VANTAGE_DATABASE_CONNECTION=mysql
 ```
 
-This ensures the `vantage_jobs` table is created and accessed from the correct database connection. The package automatically detects your database driver (MySQL, PostgreSQL, SQLite) and uses the appropriate SQL syntax for queries.
+This ensures the `vantage_jobs` table is created and accessed from the correct database connection. The package
+automatically detects your database driver (MySQL, PostgreSQL, SQLite) and uses the appropriate SQL syntax for queries.
 
 ### Authentication
 
@@ -267,7 +333,8 @@ Vantage protects the dashboard with Laravel's Gate system (similar to Horizon) v
 - **Customization:** Override the gate in your `AppServiceProvider` to implement your own rules.
 - **Disable entirely:** Set `VANTAGE_AUTH_ENABLED=false` to bypass the gate (not recommended for production).
 
-Make sure your application has authentication set up (Laravel Breeze, Jetstream or your own implementation) unless you intentionally open the dashboard to everyone.
+Make sure your application has authentication set up (Laravel Breeze, Jetstream or your own implementation) unless you
+intentionally open the dashboard to everyone.
 
 To customize access (e.g., only allow admins), override the `viewVantage` gate in your `AppServiceProvider`:
 
@@ -286,7 +353,8 @@ public function boot(): void
 }
 ```
 
-Want to keep the dashboard public but still record jobs? Either return `true` from the gate even for guests, or set `VANTAGE_AUTH_ENABLED=false`.
+Want to keep the dashboard public but still record jobs? Either return `true` from the gate even for guests, or set
+`VANTAGE_AUTH_ENABLED=false`.
 
 ### Exclude Jobs from Monitoring
 
@@ -378,6 +446,7 @@ Clean up jobs that are stuck in "processing" state. Useful for jobs that were in
 - `--dry-run` - Show what would be cleaned without actually cleaning
 
 Example:
+
 ```bash
 # Clean up jobs stuck for more than 2 hours
 php artisan vantage:cleanup-stuck --timeout=2
@@ -392,9 +461,11 @@ php artisan vantage:cleanup-stuck --dry-run
 php artisan vantage:prune [--days=30] [--hours=] [--status=] [--keep-processing] [--dry-run] [--force]
 ```
 
-Prune old job records from the database to free up space. This is essential for high-volume applications where the database can grow very large over time.
+Prune old job records from the database to free up space. This is essential for high-volume applications where the
+database can grow very large over time.
 
 **Options:**
+
 - `--days=30` - Keep jobs from the last X days (defaults to `retention_days` config value or 30)
 - `--hours=` - Keep jobs from the last X hours (overrides `--days`)
 - `--status=` - Only prune jobs with specific status (`processed`, `failed`, or `processing`). Leave empty to prune all
@@ -403,6 +474,7 @@ Prune old job records from the database to free up space. This is essential for 
 - `--force` - Skip confirmation prompt
 
 **Examples:**
+
 ```bash
 # Prune jobs older than 30 days (uses config default)
 php artisan vantage:prune
@@ -437,11 +509,13 @@ protected function schedule(Schedule $schedule)
 ```
 
 **For scheduled tasks:**
+
 - Use `--force` to skip confirmation (required for unattended execution)
 - Omit `--days` to use `vantage.retention_days` config value automatically
 - The command will show "(from config: vantage.retention_days)" in the output when using config
 
 **Important Notes:**
+
 - The command handles retry chain relationships automatically (orphans children when parents are deleted)
 - Processing jobs are preserved by default to avoid deleting active work
 - Deletion happens in chunks to avoid memory issues with large datasets
