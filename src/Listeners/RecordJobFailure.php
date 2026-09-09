@@ -44,6 +44,7 @@ class RecordJobFailure
         if ($hasStableUuid) {
             $row = VantageJob::where('uuid', $uuid)
                 ->where('status', 'processing')
+                ->where('attempt', $event->job->attempts())
                 ->first();
         }
 
@@ -137,6 +138,11 @@ class RecordJobFailure
                 'cpu_sys_ms' => $cpuDelta['sys_ms'],
             ]);
         }
+
+        // Update any previous attempts at this job as failed.
+        VantageJob::where('uuid', $uuid)
+            ->where('attempt', '<', $event->job->attempts())
+            ->update(['status' => 'failed']);
 
         VantageLogger::info('Queue Monitor: Job failed', [
             'id' => $row->id,
