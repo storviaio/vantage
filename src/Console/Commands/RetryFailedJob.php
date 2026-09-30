@@ -3,12 +3,15 @@
 namespace Storvia\Vantage\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\Jobs\Job;
 use Illuminate\Support\Str;
 use Storvia\Vantage\Models\VantageJob;
+use Storvia\Vantage\Support\JobRestorer;
 
 class RetryFailedJob extends Command
 {
-    protected $signature = 'vantage:retry {run_id} {--force : Retry even if payload is not available}';
+    protected $signature = 'vantage:retry {run_id}';
 
     protected $description = 'Retry a failed job run by ID using stored payload';
 
@@ -22,7 +25,7 @@ class RetryFailedJob extends Command
             return self::FAILURE;
         }
 
-        $jobClass = $run->job_class;
+        $jobClass = (string) $run->job_class;
 
         if (! class_exists($jobClass)) {
             $this->error("Job class {$jobClass} not found.");
@@ -30,18 +33,18 @@ class RetryFailedJob extends Command
             return self::FAILURE;
         }
 
-        // Try to restore job from payload
-        $job = $this->restoreJobFromPayload($run);
+        if (! is_subclass_of($jobClass, ShouldQueue::class) &&
+            ! is_subclass_of($jobClass, Job::class)) {
+            $this->error("Invalid job class: {$jobClass}");
 
+            return self::FAILURE;
+        }
+
+        $job = app(JobRestorer::class)->restore($run, $jobClass);
         if (! $job) {
-            if (! $this->option('force')) {
-                $this->warn("No payload available for job #{$run->id}. Use --force to retry with empty constructor.");
+            $this->error('Unable to restore job. Payload might be missing or corrupted.');
 
-                return self::FAILURE;
-            }
-
-            $this->warn('Creating job with empty constructor (--force)');
-            $job = new $jobClass;
+            return self::FAILURE;
         }
 
         $job->queueMonitorRetryOf = $run->id;
@@ -61,83 +64,5 @@ class RetryFailedJob extends Command
         }
 
         return self::SUCCESS;
-    }
-
-    /**
-     * Restore job instance from stored payload
-     */
-    protected function restoreJobFromPayload(VantageJob $run): ?object
-    {
-        if (! $run->payload) {
-            return null;
-        }
-
-        try {
-            $payload = json_decode($run->payload, true);
-
-            if (! $payload) {
-                return null;
-            }
-
-            $jobClass = $run->job_class;
-
-            return $this->recreateJobWithReflection($jobClass, $payload);
-        } catch (\Throwable $e) {
-            $this->error('Failed to restore job from payload: '.$e->getMessage());
-
-            return null;
-        }
-    }
-
-    /**
-     * Recreate job using reflection
-     */
-    protected function recreateJobWithReflection(string $jobClass, array $payload): ?object
-    {
-        try {
-            $reflection = new \ReflectionClass($jobClass);
-            $constructor = $reflection->getConstructor();
-
-            if (! $constructor) {
-                return new $jobClass;
-            }
-
-            $params = $constructor->getParameters();
-            $args = [];
-
-            foreach ($params as $param) {
-                $paramName = $param->getName();
-
-                if (isset($payload[$paramName])) {
-                    $args[] = $this->unserializeValue($payload[$paramName]);
-                } elseif ($param->isDefaultValueAvailable()) {
-                    $args[] = $param->getDefaultValue();
-                } else {
-                    $args[] = null;
-                }
-            }
-
-            return $reflection->newInstanceArgs($args);
-        } catch (\Throwable $e) {
-            $this->error('Failed to recreate job with reflection: '.$e->getMessage());
-
-            return null;
-        }
-    }
-
-    /**
-     * Convert payload value back to original type
-     */
-    protected function unserializeValue($value)
-    {
-        if (is_array($value) && isset($value['model']) && isset($value['id'])) {
-            // Restore Eloquent model
-            $modelClass = $value['model'];
-            if (class_exists($modelClass)) {
-                return $modelClass::find($value['id']);
-            }
-        }
-
-        return $value;
     }
 }

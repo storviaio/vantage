@@ -195,6 +195,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Job Restore Unserialize Allow List
+    |--------------------------------------------------------------------------
+    |
+    | Additional classes to allow when restoring serialized jobs. This is
+    | useful when job objects contain nested/child objects in their properties.
+    | The expected job class is always allowed automatically.
+    |
+    */
+    'unserialize' => [
+        'extra_allowed_classes' => [
+            // App\DataTransferObjects\SomeNestedObject::class,
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Excluded Jobs
     |--------------------------------------------------------------------------
     | Job classes listed here will not be recorded by Vantage.

@@ -45,6 +45,11 @@ class NotAJobClass
     public $data;
 }
 
+class NestedAllowedClass
+{
+    public function __construct(public string $value) {}
+}
+
 it('prevents unserializing malicious classes in Vantage::retryJob', function () {
     $vantage = new Vantage;
 
@@ -228,6 +233,34 @@ it('allows restoring valid job in JobRestorer::restore', function () {
     expect($result)->not->toBeNull()
         ->and($result)->toBeInstanceOf(TestSecureJob::class)
         ->and($result->testProperty)->toBe('test-value');
+});
+
+it('allows restoring job with configured nested class in JobRestorer::restore', function () {
+    config()->set('vantage.unserialize.extra_allowed_classes', [NestedAllowedClass::class]);
+
+    $restorer = new JobRestorer;
+    $testJob = new TestSecureJob(new NestedAllowedClass('nested-value'));
+
+    $job = VantageJob::create([
+        'uuid' => Str::uuid(),
+        'job_class' => TestSecureJob::class,
+        'status' => 'failed',
+        'queue' => 'default',
+        'payload' => json_encode([
+            'raw_payload' => [
+                'data' => [
+                    'command' => serialize($testJob),
+                ],
+            ],
+        ]),
+    ]);
+
+    $result = $restorer->restore($job, TestSecureJob::class);
+
+    expect($result)->not->toBeNull()
+        ->and($result)->toBeInstanceOf(TestSecureJob::class)
+        ->and($result->testProperty)->toBeInstanceOf(NestedAllowedClass::class)
+        ->and($result->testProperty->value)->toBe('nested-value');
 });
 
 it('handles old payload format in Vantage::retryJob', function () {

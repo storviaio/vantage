@@ -51,8 +51,13 @@ class JobRestorer
                 return null;
             }
 
-            $command = @unserialize($serialized, ['allowed_classes' => [$expectedJobClass]]);
+            $extraAllowedClasses = config('vantage.unserialize.extra_allowed_classes', []);
+            $allowedClasses = [
+                $expectedJobClass,
+                ...$extraAllowedClasses,
+            ];
 
+            $command = @unserialize($serialized, ['allowed_classes' => $allowedClasses]);
             if (! is_object($command)) {
                 VantageLogger::warning('Vantage: Unserialize did not return an object', [
                     'job_id' => $job->id,
